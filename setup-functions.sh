@@ -107,91 +107,6 @@ query_setup_data() {
         {
         local INDENT="$INDENT    "
         cat <<EOF
-        local CONFIG_TEXT="$1"
-        local TITLE="$2"
-        local QUESTION="$3"
-        local DEVICE="$4"
-        unset NAMES; local NAMES
-        unset SEQ; local SEQ
-        local INDEXES=""
-        local NAME
-        TEMP=$(mktemp /tmp/lirc.XXXXXXXXXX)
-        FULL_ENTRY=$(sed -n \
-                -e ': start' \
-                -e 's/\\[       ]*$//' \
-                -e 't more' \
-                -e 'b cont' \
-                -e ': more' \
-                -e 'N' \
-                -e 'b start' \
-                -e ': cont' \
-                -e 's/\n[       ]*//g' \
-                -e '/^[         ]*#/d' \
-                -e "/^$QUESTION:.* $DEVICE\>\([^-]\|$\)/,/^ *$/p" \
-                ${SETUP_DATA})
-        HACKED_ENTRY=$(echo "$FULL_ENTRY" | sed \
-                -e "/^$QUESTION:/d" \
-                -e '/^ *$/d' \
-                -e 's/^[        ]*//' \
-                -e 's/:[        ]*/ DESC=/' \
-                -e 's/[         ]*$//' \
-                -e '/^TITLE=/p' \
-                -e '/^TITLE=/d' \
-                -e '/^CONFIG_TEXT=/p' \
-                -e '/^CONFIG_TEXT=/d' \
-                -e 's/^/NAME=/' )
-        echo "$HACKED_ENTRY" > "$TEMP"
-        exec < "$TEMP"
-        MENU=""
-        N=0
-        DEFAULT=""
-        read LINE
-        while [ -n "$LINE" ]
-        do
-                eval "$LINE"
-                if
-                        ! expr "$LINE" : 'NAME' > /dev/null 2>&1
-                then
-                        read LINE
-                        continue
-                fi
-                if [ -z "$DESC" ]; then
-                        DEFAULT="$NAME"
-                else
-                        N=$(expr $N + 1)
-                        SEQ=$(nice_seq $N)
-                        INDEXES="$INDEXES $SEQ"
-                        MENU="$MENU \\
-                        $SEQ \"$DESC\""
-                        if
-                                ! expr "$NAME" : '@' > /dev/null 2>&1
-                        then
-                                eval "SEQ_$NAME"="\"$SEQ\""
-                        fi
-                        eval "NAME_$SEQ"="\"$NAME\""
-                fi
-                read LINE
-        done
-        if [ $N -eq 0 ] && [ -z "$DEFAULT" ]; then
-                #Nothing found assume 'none' and return error.
-                echo none
-                rm $TEMP
-                return 1
-        elif [ $N -le 1 ]; then
-                #param_type or default_param entry
-                echo $DEFAULT
-                rm $TEMP
-                return
-        elif [ $N -gt 12 ]; then
-                #More than 12 items at once don't look good.
-                N=12
-        fi
-        HEIGHT=$(expr $N + 7)
-        WIDTH=74
-        eval DEFAULT_ITEM="\$SEQ_$DEFAULT"
-        {
-        local INDENT="$INDENT    "
-        cat <<EOF
 ${INDENT}dialog  --clear --backtitle "\$BACKTITLE" \\
 ${INDENT}        --title "$TITLE" \\
 ${INDENT}        --menu "\$$CONFIG_TEXT" $HEIGHT $WIDTH $N \\
@@ -233,9 +148,9 @@ EOF
                                         echo "\tsomething may be WRONG" >&2
                                 fi
                         fi
-                        echo -n 'LIRC_DRIVER='"${NAME};\t"
+                        echo -n 'LIRC_DRIVER='"${NAME}; "
                         if [ ${#NAME} -lt 8 ]; then
-                                echo -n "\t"
+                                echo -n " "
                         fi
                         echo    'DRIVER_PARAMETER='"$DEF_PARAM;" \
                                 'DRIVER_PARAM_TYPE='"$PARAM_TYPE;"
