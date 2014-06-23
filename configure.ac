@@ -157,6 +157,7 @@ possible_drivers="(none) \
         (uirt2) \
         (uirt2_raw) \
         (usb_uirt_raw) \
+        (usb_irtoy) \
         (usbx) \
         (udp)"
 
@@ -438,7 +439,7 @@ AC_ARG_WITH(driver,
                           srm7500libusb, tekram,
                           tira, tira_raw,
                           tuxbox, tvbox, udp, uirt2, uirt2_raw,
-                          usb_uirt_raw, usbx],
+                          usb_uirt_raw, usb_irtoy, usbx],
 driver=${withval},
 driver="unset"
 )
@@ -649,6 +650,9 @@ if test "$driver" = "userspace" -o "$driver" = "all"; then
                 ;;
         uirt2_raw|usb_uirt_raw)
                 hw_module="${hw_module} hw_uirt2_raw.o hw_uirt2_common.o serial.o receive.o transmit.o"
+                ;;
+        usb_irtoy)
+                hw_module="${hw_module} hw_usbirtoy.o serial.o receive.o transmit.o"
                 ;;
         usbx)
                 hw_module="${hw_module} hw_usbx.o serial.o"
@@ -1289,6 +1293,11 @@ if test "$driver" = "uirt2_raw"; then
   lirc_driver="none"
   hw_module="hw_uirt2_raw.o hw_uirt2_common.o serial.o receive.o transmit.o"
   HW_DEFAULT="hw_uirt2_raw"
+fi
+if test "$driver" = "usb_irtoy"; then
+  lirc_driver="none"
+  hw_module="hw_usbirtoy.o serial.o receive.o transmit.o"
+  HW_DEFAULT="hw_usbirtoy"
 fi
 if test "$driver" = "usb_uirt_raw"; then
   lirc_driver="none"
