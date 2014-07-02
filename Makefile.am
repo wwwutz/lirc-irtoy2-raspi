@@ -43,7 +43,7 @@ distcheck-light:
 	$(MAKE) $(AM_MAKEFLAGS) DISTCHECK_FLAGS="$(DISTCHECK_LIGHT_FLAGS)" distcheck
 
 m4dir                       = m4
-dist_m4_DATA                = m4/ac-path-kernel-source.m4
+# dist_m4_DATA                = m4/ac-path-kernel-source.m4
 
 # ----------------------------------------------------------------------
 
